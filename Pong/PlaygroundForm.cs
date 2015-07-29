@@ -10,11 +10,16 @@ using System.Windows.Forms;
 
 namespace Pong
 {
-    public partial class Form1 : Form
+    public partial class PlaygroundForm : Form
     {
-        public Form1()
+        public PlaygroundForm()
         {
             InitializeComponent();
+        }
+
+        private void PlaygroundForm_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
