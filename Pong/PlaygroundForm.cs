@@ -15,9 +15,10 @@ namespace Pong
     {
         int TestStage = 0;
         int LifeSpanSum = 0;
-        float PadlePosition = 512;
+        int PadlePosition = 512;
         PointF BallPosition = new PointF(511, 511);
         Vector2F BallSpeed;
+        const int PixelsPerMove = 2;
 
         public PlaygroundForm()
         {
@@ -33,9 +34,46 @@ namespace Pong
             BallSpeed = BallSpeed.Shrink(1);
         }
 
+        private void MovePadle()
+        {
+            bool[] boolInputs = new bool[0];
+            long[] numberInputs = new long[5];
+            numberInputs[0] = (long)BallPosition.X;
+            numberInputs[1] = (long)BallPosition.Y;
+            numberInputs[2] = (long)BallSpeed.X;
+            numberInputs[3] = (long)BallSpeed.Y;
+            numberInputs[4] = PadlePosition;
+            Program.CurrentSample.Genome.PushInputs(boolInputs, numberInputs);
+            bool willMoveLeft = Program.CurrentSample.Genome.GetBoolOutput(0);
+            bool willMoveRight = Program.CurrentSample.Genome.GetBoolOutput(1);
+            if (!willMoveLeft == willMoveRight)
+            {
+                if (willMoveLeft && !(PadlePosition - 128 < PixelsPerMove))
+                {
+                    PadlePosition -= PixelsPerMove;
+                }
+                else if (willMoveRight && !(PadlePosition + 128 > 1024 - PixelsPerMove))
+                {
+                    PadlePosition += PixelsPerMove;
+                }
+            }
+        }
+
+        private void MoveBall()
+        {
+            BallPosition.X += BallSpeed.X;
+            BallPosition.Y += BallSpeed.Y;
+        }
+
+        private void ResolveCollisions()
+        {
+            
+        }
+
         private void UpdateScene()
         {
-
+            MovePadle();
+            MoveBall();
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e)

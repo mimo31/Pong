@@ -19,6 +19,7 @@ namespace Pong
         public static int GenerationNumber;
         public static int SampleNumber;
         public static int Speed = 1;
+        public static SampleData CurrentSample;
         public static Random R = new Random();
 
         [STAThread]
@@ -46,6 +47,7 @@ namespace Pong
                 }
                 GenerationNumber = 0;
                 SampleNumber = 0;
+                CurrentSample = Generation[0];
             }
         }
     }
