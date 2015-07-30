@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using UniGenome;
+using Vector2d;
 
 namespace Pong
 {
@@ -29,6 +30,11 @@ namespace Pong
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new PlaygroundForm());
+        }
+
+        public static void TakeNewGeneration()
+        {
+
         }
 
         static void InitalizeData()

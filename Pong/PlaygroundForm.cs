@@ -15,8 +15,9 @@ namespace Pong
     {
         int TestStage = 0;
         int LifeSpanSum = 0;
-        int PadlePosition = 512;
-        PointF BallPosition = new PointF(511, 511);
+        int CurrentLifeSpan;
+        int PadlePosition;
+        PointF BallPosition;
         Vector2F BallSpeed;
         const int PixelsPerMove = 2;
 
@@ -28,9 +29,17 @@ namespace Pong
         private void PlaygroundForm_Load(object sender, EventArgs e)
         {
             this.DoubleBuffered = true;
+            StartNewTest();
+        }
+
+        private void StartNewTest()
+        {
+            CurrentLifeSpan = 0;
+            PadlePosition = 511;
+            BallPosition = new PointF(511, 511);
             BallSpeed = new Vector2F();
-            BallSpeed.X = (float)Program.R.NextDouble();
-            BallSpeed.Y = (float)Program.R.NextDouble();
+            BallSpeed.X = (float)(Program.R.NextDouble() - 0.5);
+            BallSpeed.Y = (float)(Program.R.NextDouble() - 0.5);
             BallSpeed = BallSpeed.Shrink(1);
         }
 
@@ -67,13 +76,69 @@ namespace Pong
 
         private void ResolveCollisions()
         {
-            
+            if (BallPosition.Y < 16)
+            {
+                BallSpeed.Y = -BallSpeed.Y;
+                BallPosition.Y = 16 + 16 - BallPosition.Y;
+            }
+            else if (BallPosition.Y > 1024 - 16 - 16)
+            {
+                float distanceBelowPadle = (BallPosition.Y - (1024 - 16 - 16));
+                float possibleInterceptionPosition = BallPosition.X - distanceBelowPadle * BallSpeed.X / BallSpeed.Y;
+                if (possibleInterceptionPosition >= PadlePosition - 128 && possibleInterceptionPosition < PadlePosition + 128)
+                {
+                    BallSpeed.Y = -BallSpeed.Y;
+                    BallPosition.Y = 1024 - 16 - 16 - distanceBelowPadle;
+                }
+                else
+                {
+                    LifeSpanSum += CurrentLifeSpan;
+                    if (TestStage == 3)
+                    {
+                        Program.CurrentSample.LifeSpan = LifeSpanSum / 4;
+                        TestStage = 0;
+                        if (Program.SampleNumber == 127)
+                        {
+                            Program.TakeNewGeneration();
+                        }
+                        else
+                        {
+                            Program.SampleNumber++;
+                            Program.CurrentSample = Program.Generation[Program.SampleNumber];
+                        }
+                    }
+                    else
+                    {
+                        TestStage++;
+                    }
+                    StartNewTest();
+                    //Program.Control.UpdateValues(TestStage);
+                }
+            }
+            if (BallPosition.X < 16)
+            {
+                BallSpeed.X = -BallSpeed.X;
+                BallPosition.X = 16 + 16 - BallPosition.X;
+            }
+            else if (BallPosition.X > 1024 - 16)
+            {
+                BallSpeed.X = -BallSpeed.X;
+                BallPosition.X = 1024 - 16 - (BallPosition.X - (1024 - 16));
+            }
+        }
+
+        private void UpdateTimeAndBallSpeed()
+        {
+            CurrentLifeSpan++;
+            BallSpeed = BallSpeed.Shrink(BallSpeed.GetMagnitude() + (float)0.015625);
         }
 
         private void UpdateScene()
         {
             MovePadle();
             MoveBall();
+            ResolveCollisions();
+            UpdateTimeAndBallSpeed();
         }
 
         private void UpdateTimer_Tick(object sender, EventArgs e)
