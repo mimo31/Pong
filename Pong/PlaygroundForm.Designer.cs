@@ -28,7 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
+            this.UpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
+            // 
+            // UpdateTimer
+            // 
+            this.UpdateTimer.Enabled = true;
+            this.UpdateTimer.Interval = 25;
+            this.UpdateTimer.Tick += new System.EventHandler(this.UpdateTimer_Tick);
             // 
             // PlaygroundForm
             // 
@@ -38,11 +46,14 @@
             this.Name = "PlaygroundForm";
             this.Text = "Playground";
             this.Load += new System.EventHandler(this.PlaygroundForm_Load);
+            this.Paint += new System.Windows.Forms.PaintEventHandler(this.PlaygroundForm_Paint);
             this.ResumeLayout(false);
 
         }
 
         #endregion
+
+        private System.Windows.Forms.Timer UpdateTimer;
     }
 }
 
