@@ -22,6 +22,7 @@ namespace Pong
         public static int Speed = 1;
         public static SampleData CurrentSample;
         public static Random R = new Random();
+        public static ControlForm Control;
 
         [STAThread]
         static void Main()
@@ -34,7 +35,34 @@ namespace Pong
 
         public static void TakeNewGeneration()
         {
-
+            Generation = Generation.OrderByDescending<SampleData, long>((SampleData sample) => sample.LifeSpan).ToArray();
+            int[] unluckyIndexes = Enumerable.Range(0, 64).OrderBy(val => R.NextDouble()).Take(8).ToArray();
+            int[] luckyIndexes = Enumerable.Range(64, 64).OrderBy(val => R.NextDouble()).Take(8).ToArray();
+            SampleData[] survivors = new SampleData[64];
+            for (int i = 0; i < 64; i++)
+            {
+                if (unluckyIndexes.Contains(i))
+                {
+                    survivors[i] = Generation[luckyIndexes[Array.IndexOf(unluckyIndexes, i)]];
+                }
+                else
+                {
+                    survivors[i] = Generation[i];
+                }
+            }
+            for (int i = 0; i < 64; i++)
+            {
+                Generation[i * 2] = new SampleData() {
+                    Genome = survivors[i].Genome.GetMutation()
+                };
+                Generation[i * 2 + 1] = new SampleData()
+                {
+                    Genome = survivors[i].Genome.GetMutation()
+                };
+            }
+            GenerationNumber++;
+            SampleNumber = 0;
+            CurrentSample = Generation[SampleNumber];
         }
 
         static void InitalizeData()

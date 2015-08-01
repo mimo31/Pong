@@ -14,8 +14,7 @@ namespace Pong
     public partial class PlaygroundForm : Form
     {
         int TestStage = 0;
-        int LifeSpanSum = 0;
-        int CurrentLifeSpan;
+        long[] LifeSpans;
         int PadlePosition;
         PointF BallPosition;
         Vector2F BallSpeed;
@@ -29,12 +28,15 @@ namespace Pong
         private void PlaygroundForm_Load(object sender, EventArgs e)
         {
             this.DoubleBuffered = true;
+            Program.Control = new ControlForm();
+            Program.Control.Show();
+            Program.Control.UpdateValues(0);
+            LifeSpans = new long[4];
             StartNewTest();
         }
 
         private void StartNewTest()
         {
-            CurrentLifeSpan = 0;
             PadlePosition = 511;
             BallPosition = new PointF(511, 511);
             BallSpeed = new Vector2F();
@@ -92,10 +94,10 @@ namespace Pong
                 }
                 else
                 {
-                    LifeSpanSum += CurrentLifeSpan;
                     if (TestStage == 3)
                     {
-                        Program.CurrentSample.LifeSpan = LifeSpanSum / 4;
+                        Program.CurrentSample.LifeSpan = CalculateAverageLifeSpan(LifeSpans);
+                        LifeSpans = new long[4];
                         TestStage = 0;
                         if (Program.SampleNumber == 127)
                         {
@@ -112,7 +114,7 @@ namespace Pong
                         TestStage++;
                     }
                     StartNewTest();
-                    //Program.Control.UpdateValues(TestStage);
+                    Program.Control.UpdateValues(TestStage);
                 }
             }
             if (BallPosition.X < 16)
@@ -127,9 +129,15 @@ namespace Pong
             }
         }
 
+        private long CalculateAverageLifeSpan(long[] array)
+        {
+            array = array.OrderBy(val => val).ToArray();
+            return (array[1] + array[2]) / 2;
+        } 
+
         private void UpdateTimeAndBallSpeed()
         {
-            CurrentLifeSpan++;
+            LifeSpans[TestStage]++;
             BallSpeed = BallSpeed.Shrink(BallSpeed.GetMagnitude() + (float)0.015625);
         }
 
